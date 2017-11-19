@@ -1,0 +1,6 @@
+[package]
+name = "crates-bot"
+version = "0.1.0"
+authors = ["Gustavo Aguiar <gugahoa@gmail.com>"]
+
+[dependencies]
