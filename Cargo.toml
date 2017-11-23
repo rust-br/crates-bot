@@ -4,3 +4,8 @@ version = "0.1.0"
 authors = ["Gustavo Aguiar <gugahoa@gmail.com>"]
 
 [dependencies]
+reqwest = "0.8.1"
+telebot = "0.2.1"
+erased-serde = "0.3"
+futures = "0.1.7"
+tokio-core = "0.1.2"
