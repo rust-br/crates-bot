@@ -12,6 +12,7 @@ pub struct Crate {
     pub name: String,
     pub description: Option<String>,
     pub documentation: Option<String>,
+    pub repository: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
