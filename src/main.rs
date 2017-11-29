@@ -33,16 +33,26 @@ fn main() {
                 .crates
                 .into_iter()
                 .map(|each_crate| {
+                    let crate_name = each_crate.name;
+                    let crate_doc = each_crate.documentation.unwrap_or("None".into());
+                    let crate_desc = each_crate.description.unwrap_or("".into());
+                    let crate_repo = each_crate.repository.unwrap_or("".into());
+
+                    let msg_text =
+                        format!(
+                            "*Crate*: {}\n*Description*: {}\n*Repository*: {}\n*Doc*: {}",
+                            &crate_name,
+                            &crate_desc,
+                            &crate_repo,
+                            &crate_doc,
+                            );
+                    let input_message_content = InputMessageContent::Text::new(msg_text);
                     let inline_resp = InlineQueryResultArticle::new(
-                        each_crate.name.into(),
-                        Box::new(InputMessageContent::Text::new(
-                            each_crate.documentation.unwrap_or("None".into()).into(),
-                        )),
+                        crate_name.clone().into(),
+                        Box::new(input_message_content),
                     );
 
-                    Box::new(inline_resp.description(
-                        each_crate.description.unwrap_or("".into()),
-                    )) as Box<Serialize>
+                    Box::new(inline_resp.description(crate_desc)) as Box<Serialize>
                 })
                 .collect();
 
