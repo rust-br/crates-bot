@@ -1,11 +1,13 @@
 [package]
-name = "crates-bot"
+name = "crates_bot"
 version = "0.1.0"
 authors = ["Gustavo Aguiar <gugahoa@gmail.com>"]
 
 [dependencies]
-reqwest = "0.8.1"
-telebot = "0.2.1"
+telebot = "0.2.3"
 erased-serde = "0.3"
 futures = "0.1.7"
 tokio-core = "0.1.2"
+crates_api = { path = "crates_api" }
+
+[workspace]
