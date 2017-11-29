@@ -1,1 +1,1 @@
-web: ./target/release/crates-bot
+worker: ./target/release/crates_bot
