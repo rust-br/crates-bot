@@ -33,11 +33,15 @@ fn main() {
                 .crates
                 .into_iter()
                 .map(|each_crate| {
-                    Box::new(InlineQueryResultArticle::new(
+                    let inline_resp = InlineQueryResultArticle::new(
                         each_crate.name.into(),
                         Box::new(InputMessageContent::Text::new(
-                            each_crate.description.unwrap_or("".into()).into(),
+                            each_crate.documentation.unwrap_or("None".into()).into(),
                         )),
+                    );
+
+                    Box::new(inline_resp.description(
+                        each_crate.description.unwrap_or("".into()),
                     )) as Box<Serialize>
                 })
                 .collect();
