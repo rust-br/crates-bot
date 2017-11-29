@@ -2,6 +2,7 @@ extern crate telebot;
 extern crate tokio_core;
 extern crate futures;
 extern crate erased_serde;
+extern crate crates_api;
 
 use telebot::RcBot;
 use tokio_core::reactor::Core;
@@ -27,20 +28,21 @@ fn main() {
             msg.inline_query.map(|query| (bot, query))
         })
         .and_then(|(bot, query)| {
-            let result: Vec<Box<Serialize>> = vec![
-                Box::new(InlineQueryResultArticle::new(
-                    "Test".into(),
-                    Box::new(InputMessageContent::Text::new(
-                        "This is a test".into(),
-                    )),
-                )),
-            ];
+            let crates = crates_api::query(query.query);
+            let result: Vec<Box<Serialize>> = crates
+                .crates
+                .into_iter()
+                .map(|each_crate| {
+                    Box::new(InlineQueryResultArticle::new(
+                        each_crate.name.into(),
+                        Box::new(InputMessageContent::Text::new(
+                            each_crate.description.unwrap_or("".into()).into(),
+                        )),
+                    )) as Box<Serialize>
+                })
+                .collect();
 
-            bot.answer_inline_query(query.id, result)
-                .is_personal(true)
-                .next_offset("")
-                .switch_pm_text("")
-                .send()
+            bot.answer_inline_query(query.id, result).send()
         });
 
     // enter the main loop
