@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Gustavo Aguiar <gugahoa@gmail.com>"]
 
 [dependencies]
-telebot = "0.2.3"
+telebot = { git = "https://github.com/gugahoa/telebot", branch = "inline_improvements" }
 erased-serde = "0.3"
 futures = "0.1.7"
 tokio-core = "0.1.2"

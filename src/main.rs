@@ -20,25 +20,33 @@ fn inline_result(crates: Vec<crates_api::Crate>) -> Vec<Box<Serialize>> {
         .into_iter()
         .map(|each_crate| {
             let crate_name = each_crate.name;
-            let crate_doc = each_crate.documentation.unwrap_or("None".into());
-            let crate_desc = each_crate.description.unwrap_or("".into());
-            let crate_repo = each_crate.repository.unwrap_or("".into());
+            let crate_desc = each_crate.description.unwrap_or("".to_owned());
 
             let msg_text =
                 format!(
-                "<strong>Crate</strong>: {}\n<strong>Description</strong>: {}\n<strong>Repository</strong>: {}\n<strong>Doc</strong>: {}\n\n<strong>Total downloads</strong>: {}. <strong>Recent downloads</strong>: {}",
+                "<strong>Crate</strong>: {}\n<strong>Description</strong>: {}\n\n<strong>Total downloads</strong>: {}. <strong>Recent downloads</strong>: {}",
                 &crate_name,
                 &crate_desc,
-                &crate_repo,
-                &crate_doc,
                 each_crate.downloads,
                 each_crate.recent_downloads
                 );
             let input_message_content = InputMessageContent::Text::new(msg_text).parse_mode("html").disable_web_page_preview(true);
+
+            let mut inline_keyboard_buttons = Vec::new();
+            if let Some(crate_repo) = each_crate.repository {
+                inline_keyboard_buttons.push(InlineKeyboardButton::new("Repository".to_owned()).url(crate_repo));
+            }
+
+            if let Some(crate_doc) = each_crate.documentation {
+                inline_keyboard_buttons.push(InlineKeyboardButton::new("Documentation".to_owned()).url(crate_doc));
+            }
+
+            let inline_keyboard_markup = InlineKeyboardMarkup { inline_keyboard: vec![inline_keyboard_buttons] };
+
             let inline_resp = InlineQueryResultArticle::new(
                 crate_name.clone().into(),
                 Box::new(input_message_content),
-            );
+            ).reply_markup(inline_keyboard_markup);
 
             Box::new(inline_resp.description(crate_desc)) as Box<Serialize>
         })
