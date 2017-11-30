@@ -15,6 +15,8 @@ pub struct Crate {
     pub description: Option<String>,
     pub documentation: Option<String>,
     pub repository: Option<String>,
+    pub recent_downloads: u32,
+    pub downloads: u32,
 }
 
 #[derive(Deserialize, Debug)]

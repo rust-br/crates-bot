@@ -26,11 +26,13 @@ fn inline_result(crates: Vec<crates_api::Crate>) -> Vec<Box<Serialize>> {
 
             let msg_text =
                 format!(
-                "<strong>Crate</strong>: {}\n<strong>Description</strong>: {}\n<strong>Repository</strong>: {}\n<strong>Doc</strong>: {}",
+                "<strong>Crate</strong>: {}\n<strong>Description</strong>: {}\n<strong>Repository</strong>: {}\n<strong>Doc</strong>: {}\n\n<strong>Total downloads</strong>: {}. <strong>Recent downloads</strong>: {}",
                 &crate_name,
                 &crate_desc,
                 &crate_repo,
                 &crate_doc,
+                each_crate.downloads,
+                each_crate.recent_downloads
                 );
             let input_message_content = InputMessageContent::Text::new(msg_text).parse_mode("html").disable_web_page_preview(true);
             let inline_resp = InlineQueryResultArticle::new(
