@@ -1,10 +1,4 @@
-extern crate reqwest;
-
-extern crate serde;
-extern crate serde_json;
-
-#[macro_use]
-extern crate serde_derive;
+use serde::Deserialize;
 
 use std::error;
 use std::fmt;
@@ -67,9 +61,9 @@ impl fmt::Display for CratesError {
     }
 }
 
-pub fn query(query_string: String) -> Result<Crates, CratesError> {
+pub fn search(crate_name: &str) -> Result<Crates, CratesError> {
     let crates: Crates = reqwest::get(
-        format!("https://crates.io/api/v1/crates?q={}", query_string).as_str(),
+        &format!("https://crates.io/api/v1/crates?q={}", crate_name),
     )?
         .json()?;
 
