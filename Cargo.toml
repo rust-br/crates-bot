@@ -5,7 +5,7 @@ authors = ["Gustavo Aguiar <gugahoa@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-telegram-bot = { path = "../../telegram-rs/telegram-bot/lib" }
+telegram-bot = { git = "https://github.com/telegram-rs/telegram-bot", branch = "master" }
 erased-serde = "0.3"
 futures = "0.1.7"
 tokio-core = "0.1.2"

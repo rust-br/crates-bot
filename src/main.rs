@@ -1,8 +1,9 @@
 use tokio_core::reactor::Core;
 use std::env;
 use telegram_bot::{Api, UpdateKind};
+use telegram_bot::types::{InlineQueryResultArticle, InputTextMessageContent};
+use telegram_bot::prelude::*;
 use futures::stream::Stream;
-use futures::future::Future;
 
 fn main() {
     let mut core = Core::new().unwrap();
@@ -19,10 +20,21 @@ fn main() {
             err
         })
         .for_each(|update| {
-            dbg!(&update);
-            match update {
-                UpdateKind::InlineQuery(InlineQuery) => {
-
+            match update.kind {
+                UpdateKind::InlineQuery(query) => {
+                    dbg!(&query);
+                    let user_query = query.query.clone();
+                    let mut ans = query.answer(vec![]);
+                    ans.add_inline_result(InlineQueryResultArticle::new(
+                        "id".into(),
+                        "title".into(),
+                        InputTextMessageContent {
+                            message_text: user_query,
+                            parse_mode: None,
+                            disable_web_page_preview: true
+                        }.into()
+                    ));
+                    api.spawn(ans);
                 },
                 _ => {}
             }
