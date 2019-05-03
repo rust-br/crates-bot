@@ -62,10 +62,8 @@ impl fmt::Display for Error {
 }
 
 pub fn search(crate_name: &str) -> Result<Crates, Error> {
-    let crates: Crates = reqwest::get(
-        &format!("https://crates.io/api/v1/crates?q={}", crate_name),
-    )?
-        .json()?;
+    let crates: Crates =
+        reqwest::get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))?.json()?;
 
     Ok(crates)
 }
