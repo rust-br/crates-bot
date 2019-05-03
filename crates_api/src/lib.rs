@@ -19,49 +19,49 @@ pub struct Crates {
 }
 
 #[derive(Debug)]
-pub enum CratesError {
+pub enum Error {
     RequestError(reqwest::Error),
     DeserializeError(serde_json::Error),
 }
 
-impl From<reqwest::Error> for CratesError {
-    fn from(err: reqwest::Error) -> CratesError {
-        CratesError::RequestError(err)
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Error {
+        Error::RequestError(err)
     }
 }
 
-impl From<serde_json::Error> for CratesError {
-    fn from(err: serde_json::Error) -> CratesError {
-        CratesError::DeserializeError(err)
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Error {
+        Error::DeserializeError(err)
     }
 }
 
-impl error::Error for CratesError {
+impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
-            CratesError::RequestError(ref req_err) => req_err.description(),
-            CratesError::DeserializeError(ref serde_err) => serde_err.description(),
+            Error::RequestError(ref req_err) => req_err.description(),
+            Error::DeserializeError(ref serde_err) => serde_err.description(),
         }
     }
 
     fn cause(&self) -> Option<&error::Error> {
         match *self {
-            CratesError::RequestError(ref req_err) => Some(req_err),
-            CratesError::DeserializeError(ref serde_err) => Some(serde_err),
+            Error::RequestError(ref req_err) => Some(req_err),
+            Error::DeserializeError(ref serde_err) => Some(serde_err),
         }
     }
 }
 
-impl fmt::Display for CratesError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            CratesError::DeserializeError(ref serde_err) => serde_err.fmt(f),
-            CratesError::RequestError(ref req_err) => req_err.fmt(f),
+            Error::DeserializeError(ref serde_err) => serde_err.fmt(f),
+            Error::RequestError(ref req_err) => req_err.fmt(f),
         }
     }
 }
 
-pub fn search(crate_name: &str) -> Result<Crates, CratesError> {
+pub fn search(crate_name: &str) -> Result<Crates, Error> {
     let crates: Crates = reqwest::get(
         &format!("https://crates.io/api/v1/crates?q={}", crate_name),
     )?
