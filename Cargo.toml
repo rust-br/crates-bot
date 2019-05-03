@@ -6,9 +6,12 @@ edition = "2018"
 
 [dependencies]
 telegram-bot = { git = "https://github.com/telegram-rs/telegram-bot", branch = "add_inline_answer_support" }
-erased-serde = "0.3"
 futures = "0.1.7"
 tokio-core = "0.1.2"
-crates_api = { path = "crates_api" }
+reqwest = "0.9"
+serde_json = "1.0"
+
+serde = { version = "1.0", features = ["derive"]}
+
 
 [workspace]

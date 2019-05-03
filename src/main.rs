@@ -23,13 +23,13 @@ fn main() {
         .for_each(|update| {
             match update.kind {
                 UpdateKind::InlineQuery(query) => {
-                    let crates_result = crates_api::search(&query.query);
+                    let crates_result = crates_bot::search(&query.query);
                     let mut ans = query.answer(vec![]);
 
                     match crates_result {
-                        Ok(crates_api::Crates { crates }) => {
+                        Ok(crates_bot::Crates { crates }) => {
                             crates.into_iter()
-                                .for_each(|c: crates_api::Crate| {
+                                .for_each(|c: crates_bot::Crate| {
                                     let message_text = format!(
                                         "*Crate*: {}\n*Description*: {}\n*Total downloads*: {}, *Recent downloads*: {}",
                                         &c.name,
