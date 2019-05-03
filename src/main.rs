@@ -1,15 +1,16 @@
-use tokio_core::reactor::Core;
-use std::env;
-use telegram_bot::{Api, UpdateKind};
-use telegram_bot::types::{InlineQueryResultArticle, InputTextMessageContent};
-use telegram_bot::prelude::*;
 use futures::stream::Stream;
+use std::env;
+use telegram_bot::prelude::*;
+use telegram_bot::types::{
+    InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent,
+};
+use telegram_bot::{Api, UpdateKind};
+use tokio_core::reactor::Core;
 
 fn main() {
     let mut core = Core::new().unwrap();
 
-    let token = env::var("TELEGRAM_BOT_KEY")
-        .expect("TELEGRAM_BOT_KEY not found in environment");
+    let token = env::var("TELEGRAM_BOT_KEY").expect("TELEGRAM_BOT_KEY not found in environment");
 
     let api = Api::configure(token)
         .build(core.handle())
@@ -22,18 +23,64 @@ fn main() {
         .for_each(|update| {
             match update.kind {
                 UpdateKind::InlineQuery(query) => {
-                    dbg!(&query);
-                    let user_query = query.query.clone();
+                    let crates_result = crates_api::search(&query.query);
                     let mut ans = query.answer(vec![]);
-                    ans.add_inline_result(InlineQueryResultArticle::new(
-                        "id".into(),
-                        "title".into(),
-                        InputTextMessageContent {
-                            message_text: user_query,
-                            parse_mode: None,
-                            disable_web_page_preview: true
-                        }.into()
-                    ));
+
+                    match crates_result {
+                        Ok(crates_api::Crates { crates }) => {
+                            crates.into_iter()
+                                .for_each(|c: crates_api::Crate| {
+                                    let message_text = format!(
+                                        "*Crate*: {}\n*Description*: {}\n*Total downloads*: {}, *Recent downloads*: {}",
+                                        &c.name,
+                                        &c.description.clone().unwrap_or("".into()),
+                                        &c.downloads,
+                                        &c.recent_downloads
+                                    );
+
+                                    let input_text_message_content = InputTextMessageContent {
+                                        message_text,
+                                        parse_mode: Some(telegram_bot::ParseMode::Markdown),
+                                        disable_web_page_preview: true
+                                    };
+
+                                    let mut article = InlineQueryResultArticle::new(
+                                        c.name.clone(),
+                                        c.name,
+                                        input_text_message_content
+                                    );
+
+                                    if let Some(description) = c.description {
+                                        article.description(description);
+                                    }
+
+                                    let mut inline_keyboard_row: Vec<InlineKeyboardButton> = vec![];
+                                    if let Some(repository) = c.repository {
+                                        inline_keyboard_row.push(InlineKeyboardButton::url("Repository", &repository));
+                                    }
+
+                                    if let Some(crates_doc) = c.documentation {
+                                        inline_keyboard_row.push(InlineKeyboardButton::url("Documentation", &crates_doc));
+                                    }
+
+                                    let inline_keyboard = InlineKeyboardMarkup::from(vec![inline_keyboard_row]);
+                                    article.reply_markup(inline_keyboard);
+                                    ans.add_inline_result(article);
+                                })
+                        },
+                        Err(_err) => {
+                            ans.add_inline_result(InlineQueryResultArticle::new(
+                                "random_id",
+                                "An error occurred, could not search crates.io",
+                                InputTextMessageContent {
+                                    message_text: "Error searching crates.io, could not return result".into(),
+                                    parse_mode: None,
+                                    disable_web_page_preview: false
+                                }
+                            ))
+                        }
+                    }
+
                     api.spawn(ans);
                 },
                 _ => {}
