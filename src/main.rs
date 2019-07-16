@@ -18,71 +18,66 @@ fn main() {
     let update_stream = api.stream()
         .map_err(|err| {
             dbg!(&err);
-            err
+            crates_bot::Error::TelegramError(err)
         })
         .for_each(|update| {
-            match update.kind {
-                UpdateKind::InlineQuery(query) => {
-                    let crates_result = crates_bot::search(&query.query);
-                    let mut ans = query.answer(vec![]);
+            if let UpdateKind::InlineQuery(query) = update.kind {
+                let query_string = query.query.clone();
+                let mut ans = query.answer(vec![]);
+                let _ = crates_bot::search(&query_string)
+                    .map(|crates| {
+                        let crates_bot::Crates { crates } = crates;
+                        for c in crates {
+                            let message_text = format!(
+                                "*Crate*: {}\n*Description*: {}\n*Total downloads*: {}, *Recent downloads*: {}",
+                                &c.name,
+                                &c.description.clone().unwrap_or("".into()),
+                                &c.downloads,
+                                &c.recent_downloads
+                            );
 
-                    match crates_result {
-                        Ok(crates_bot::Crates { crates }) => {
-                            crates.into_iter()
-                                .for_each(|c: crates_bot::Crate| {
-                                    let message_text = format!(
-                                        "*Crate*: {}\n*Description*: {}\n*Total downloads*: {}, *Recent downloads*: {}",
-                                        &c.name,
-                                        &c.description.clone().unwrap_or("".into()),
-                                        &c.downloads,
-                                        &c.recent_downloads
-                                    );
+                            let input_text_message_content = InputTextMessageContent {
+                                message_text,
+                                parse_mode: Some(telegram_bot::ParseMode::Markdown),
+                                disable_web_page_preview: true,
+                            };
 
-                                    let input_text_message_content = InputTextMessageContent {
-                                        message_text,
-                                        parse_mode: Some(telegram_bot::ParseMode::Markdown),
-                                        disable_web_page_preview: true,
-                                    };
+                            let mut article = InlineQueryResultArticle::new(
+                                c.name.clone(),
+                                c.name,
+                                input_text_message_content,
+                            );
 
-                                    let mut article = InlineQueryResultArticle::new(
-                                        c.name.clone(),
-                                        c.name,
-                                        input_text_message_content,
-                                    );
+                            if let Some(description) = c.description {
+                                article.description(description);
+                            }
 
-                                    if let Some(description) = c.description {
-                                        article.description(description);
-                                    }
+                            let mut inline_keyboard_row = vec![];
+                            if let Some(repository) = c.repository {
+                                inline_keyboard_row.push(InlineKeyboardButton::url("Repository", &repository));
+                            }
 
-                                    let mut inline_keyboard_row = vec![];
-                                    if let Some(repository) = c.repository {
-                                        inline_keyboard_row.push(InlineKeyboardButton::url("Repository", &repository));
-                                    }
+                            if let Some(crates_doc) = c.documentation {
+                                inline_keyboard_row.push(InlineKeyboardButton::url("Documentation", &crates_doc));
+                            }
 
-                                    if let Some(crates_doc) = c.documentation {
-                                        inline_keyboard_row.push(InlineKeyboardButton::url("Documentation", &crates_doc));
-                                    }
-
-                                    article.reply_markup(vec![inline_keyboard_row]);
-                                    ans.add_inline_result(article);
-                                })
+                            article.reply_markup(vec![inline_keyboard_row]);
+                            ans.add_inline_result(article);
                         }
-                        Err(_err) => {
-                            ans.add_inline_result(InlineQueryResultArticle::new(
-                                "random_id",
-                                "An error occurred, could not search crates.io",
-                                InputTextMessageContent {
-                                    message_text: "Error searching crates.io, could not return result".into(),
-                                    parse_mode: None,
-                                    disable_web_page_preview: false,
-                                },
-                            ))
-                        }
-                    }
+                    })
+                    .map_err(|_| {
+                        ans.add_inline_result(InlineQueryResultArticle::new(
+                            "random_id",
+                            "An error occurred, could not search crates.io",
+                            InputTextMessageContent {
+                                message_text: "Error searching crates.io, could not return result".into(),
+                                parse_mode: None,
+                                disable_web_page_preview: false,
+                            },
+                        ));
+                    });
 
-                    api.spawn(ans);
-                }
-                _ => {}
+                api.spawn(ans);
             }
 
             Ok(())
