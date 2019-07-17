@@ -1,3 +1,5 @@
+use futures::prelude::*;
+use reqwest::r#async::Client;
 use serde::Deserialize;
 
 use std::error;
@@ -22,7 +24,7 @@ pub struct Crates {
 pub enum Error {
     RequestError(reqwest::Error),
     DeserializeError(serde_json::Error),
-    TelegramError(telegram_bot::Error)
+    TelegramError(telegram_bot::Error),
 }
 
 impl From<reqwest::Error> for Error {
@@ -42,7 +44,7 @@ impl error::Error for Error {
         match *self {
             Error::RequestError(ref req_err) => req_err.description(),
             Error::DeserializeError(ref serde_err) => serde_err.description(),
-            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.description()
+            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.description(),
         }
     }
 
@@ -50,7 +52,7 @@ impl error::Error for Error {
         match *self {
             Error::RequestError(ref req_err) => Some(req_err),
             Error::DeserializeError(ref serde_err) => Some(serde_err),
-            Error::TelegramError(ref telegram_bot_err) => Some(telegram_bot_err)
+            Error::TelegramError(ref telegram_bot_err) => Some(telegram_bot_err),
         }
     }
 }
@@ -60,14 +62,15 @@ impl fmt::Display for Error {
         match *self {
             Error::DeserializeError(ref serde_err) => serde_err.fmt(f),
             Error::RequestError(ref req_err) => req_err.fmt(f),
-            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.fmt(f)
+            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.fmt(f),
         }
     }
 }
 
-pub fn search(crate_name: &str) -> Result<Crates, Error> {
-    let crates: Crates =
-        reqwest::get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))?.json()?;
-
-    Ok(crates)
+pub fn search(crate_name: &str) -> impl Future<Item = Crates, Error = reqwest::Error> {
+    let client = Client::new();
+    client
+        .get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))
+        .send()
+        .and_then(|mut resp| resp.json())
 }

@@ -6,12 +6,12 @@ edition = "2018"
 
 [dependencies]
 telegram-bot = { git = "https://github.com/telegram-rs/telegram-bot" }
-futures = "0.1.7"
-tokio-core = "0.1.2"
+futures = "0.1"
+tokio-core = "0.1"
 reqwest = "0.9"
 serde_json = "1.0"
 
-serde = { version = "1.0", features = ["derive"]}
+serde = { version = "1.0", features = ["derive"] }
 
 
 [workspace]
