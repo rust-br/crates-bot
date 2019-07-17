@@ -21,6 +21,7 @@ fn main() {
             crates_bot::Error::TelegramError(err)
         })
         .for_each(|update| {
+            dbg!(&update);
             if let UpdateKind::InlineQuery(query) = update.kind {
                 let query_string = query.query.clone();
                 let mut ans = query.answer(vec![]);
@@ -65,7 +66,8 @@ fn main() {
                             ans.add_inline_result(article);
                         }
                     })
-                    .map_err(|_| {
+                    .map_err(|err| {
+                        dbg!(err);
                         ans.add_inline_result(InlineQueryResultArticle::new(
                             "random_id",
                             "An error occurred, could not search crates.io",
