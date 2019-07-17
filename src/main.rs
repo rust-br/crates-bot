@@ -70,7 +70,6 @@ fn main() {
                                 ans.add_inline_result(article);
                             }
 
-                            dbg!(serde_json::to_string(&ans));
                             api.spawn(ans);
                         })
                         .map_err(|err| {
