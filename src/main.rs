@@ -34,7 +34,7 @@ fn main() {
                             let mut ans = query_clone.answer(vec![]);
                             for c in crates {
                                 let message_text = format!(
-                                    "*Crate*: {}\n*Description*: {}\n*Total downloads*: {}, *Recent downloads*: {}",
+                                    "<b>Crate</b>: {}\n<b>Description</b>: {}\n<b>Total downloads</b>: {}, <b>Recent downloads</b>: {}",
                                     &c.name,
                                     &c.description.clone().unwrap_or("".into()),
                                     &c.downloads,
@@ -43,7 +43,7 @@ fn main() {
 
                                 let input_text_message_content = InputTextMessageContent {
                                     message_text,
-                                    parse_mode: Some(telegram_bot::ParseMode::Markdown),
+                                    parse_mode: Some(telegram_bot::ParseMode::Html),
                                     disable_web_page_preview: true,
                                 };
 
