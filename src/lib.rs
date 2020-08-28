@@ -1,6 +1,5 @@
 use serde::Deserialize;
 
-use std::error;
 use std::fmt;
 
 #[derive(Deserialize, Debug)]
@@ -34,24 +33,6 @@ impl From<reqwest::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Error {
         Error::DeserializeError(err)
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::RequestError(ref req_err) => req_err.description(),
-            Error::DeserializeError(ref serde_err) => serde_err.description(),
-            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn error::Error> {
-        match *self {
-            Error::RequestError(ref req_err) => Some(req_err),
-            Error::DeserializeError(ref serde_err) => Some(serde_err),
-            Error::TelegramError(ref telegram_bot_err) => Some(telegram_bot_err),
-        }
     }
 }
 
