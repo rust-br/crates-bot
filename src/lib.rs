@@ -38,10 +38,10 @@ impl From<serde_json::Error> for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::DeserializeError(ref serde_err) => serde_err.fmt(f),
-            Error::RequestError(ref req_err) => req_err.fmt(f),
-            Error::TelegramError(ref telegram_bot_err) => telegram_bot_err.fmt(f),
+        match self {
+            Error::DeserializeError(serde_err) => serde_err.fmt(f),
+            Error::RequestError(req_err) => req_err.fmt(f),
+            Error::TelegramError(telegram_bot_err) => telegram_bot_err.fmt(f),
         }
     }
 }
