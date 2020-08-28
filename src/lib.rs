@@ -1,5 +1,3 @@
-use futures::prelude::*;
-use reqwest::r#async::Client;
 use serde::Deserialize;
 
 use std::error;
@@ -67,10 +65,9 @@ impl fmt::Display for Error {
     }
 }
 
-pub fn search(crate_name: &str) -> impl Future<Item = Crates, Error = reqwest::Error> {
-    let client = Client::new();
-    client
-        .get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))
-        .send()
-        .and_then(|mut resp| resp.json())
+pub async fn search(crate_name: &str) -> Result<Crates, reqwest::Error> {
+    reqwest::get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))
+        .await?
+        .json()
+        .await
 }
