@@ -1,7 +1,5 @@
 use serde::Deserialize;
 
-use std::fmt;
-
 #[derive(Deserialize, Debug)]
 pub struct Crate {
     pub name: String,
@@ -36,19 +34,11 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::DeserializeError(serde_err) => serde_err.fmt(f),
-            Error::RequestError(req_err) => req_err.fmt(f),
-            Error::TelegramError(telegram_bot_err) => telegram_bot_err.fmt(f),
-        }
-    }
-}
+pub async fn search(client: &reqwest::Client, crate_name: &str) -> Result<Crates, reqwest::Error> {
+    let req = client
+        .get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))
+        .query(&[("q", crate_name)])
+        .build()?;
 
-pub async fn search(crate_name: &str) -> Result<Crates, reqwest::Error> {
-    reqwest::get(&format!("https://crates.io/api/v1/crates?q={}", crate_name))
-        .await?
-        .json()
-        .await
+    client.execute(req).await?.json().await
 }
