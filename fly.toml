@@ -1,0 +1,12 @@
+# fly.toml file generated for crates-bot on 2023-02-02T19:10:48-03:00
+
+app = "crates-bot"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[env]
+
+[experimental]
+auto_rollback = true
+entrypoint = ["/app/crates_bot"]
